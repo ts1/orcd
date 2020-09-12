@@ -1,5 +1,8 @@
 # orcd
+
 OPENREC.tvコメントダウンローダー
+
+![サンプル画像](https://github.com/ts1/orcd/blob/master/sample.jpg?raw=true)
 
 ## 必要なもの
 
@@ -25,8 +28,6 @@ orcd URL
 
 URLにOPENREC.tvのアーカイブURLを指定します。
 
-コメントのダウンロードに`成功するとタイトルと同名のXMLファイルに保存されます。
+コメントのダウンロードに成功するとタイトルと同名のXMLファイルに保存されます。
 
 XMLファイルは Cometan のようなプレイヤーで使用できます。
-
-## 使用例
