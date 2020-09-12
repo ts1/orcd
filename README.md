@@ -1,5 +1,7 @@
 # orcd
 
+![CI](https://github.com/ts1/orcd/workflows/CI/badge.svg)
+
 OPENREC.tvコメントダウンローダー
 
 ![サンプル画像](https://github.com/ts1/orcd/blob/master/sample.jpg?raw=true)
