@@ -1,5 +1,6 @@
 # orcd
 
+[![npm version](https://badge.fury.io/js/orcd.svg)](https://badge.fury.io/js/orcd)
 ![CI](https://github.com/ts1/orcd/workflows/CI/badge.svg)
 
 OPENREC.tvコメントダウンローダー
