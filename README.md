@@ -9,7 +9,7 @@ OPENREC.tvコメントダウンローダー
 
 ## 必要なもの
 
-- Node.js
+- Node.js 10.x以上
 
 ## インストール
 
