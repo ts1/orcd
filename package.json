@@ -1,0 +1,39 @@
+{
+  "name": "orcd",
+  "version": "0.1.0",
+  "license": "MIT",
+  "description": "Comment downloader for OPENREC.tv",
+  "author": "Takeshi Sone <takeshi.sone@gmail.com> (https://github.com/ts1)",
+  "repository": "github:ts1/orcd",
+  "dependencies": {
+    "node-fetch": "^2.6.1",
+    "xmlbuilder2": "^2.3.1",
+    "yargs": "^16.0.3"
+  },
+  "scripts": {
+    "dist": "echo '#!/usr/bin/env node' > orcd.js && coffee -cbs < orcd.coffee >>orcd.js && chmod +x orcd.js",
+    "orcd": "coffee orcd.coffee",
+    "test": "jest"
+  },
+  "main": "orcd.js",
+  "bin": {
+    "orcd": "orcd.js"
+  },
+  "files": [
+    "orcd.js"
+  ],
+  "devDependencies": {
+    "coffeescript": "^2.5.1",
+    "jest": "^26.4.2"
+  },
+  "jest": {
+    "transform": {
+      "\\.coffee$": "<rootDir>/coffee-preprocessor.js"
+    },
+    "testRegex": "test*\\.coffee$",
+    "moduleFileExtensions": [
+      "js",
+      "coffee"
+    ]
+  }
+}
