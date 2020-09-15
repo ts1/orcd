@@ -7,6 +7,7 @@
   "repository": "github:ts1/orcd",
   "dependencies": {
     "node-fetch": "^2.6.1",
+    "xml2js": "^0.4.23",
     "xmlbuilder2": "^2.3.1",
     "yargs": "^16.0.3"
   },

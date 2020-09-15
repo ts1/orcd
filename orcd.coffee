@@ -2,6 +2,7 @@ path = require 'path'
 fs = require 'fs'
 fetch = require 'node-fetch'
 { create } = require 'xmlbuilder2'
+xml2js = require 'xml2js'
 
 get_json = (url) ->
   res = await fetch url
@@ -11,7 +12,6 @@ get_json = (url) ->
 write_tty = (s) -> process.stderr.write s if process.stderr.isTTY
 
 show_progress = (progress) ->
-  return unless process.stderr.isTTY
   w = process.stderr.columns - 7
   bar = '░'.repeat Math.round(w * progress)
   bar += '─'.repeat w - bar.length
@@ -19,7 +19,7 @@ show_progress = (progress) ->
   write_tty "\r[#{bar}] #{percent}%"
 
 info_from_url = (url) ->
-  unless url.startsWith 'https://www.openrec.tv/'
+  unless /^https?:\/\/www\.openrec\.tv\/live\//.test url
     throw new Error 'URLが正しくありません'
   video_id = url.split('/').slice(-1)[0]
   await get_json 'https://public.openrec.tv/external/api/v5/movies/' + video_id
@@ -52,9 +52,30 @@ download_comments = (info, delay) ->
     break unless new_chat
   list
 
+parse_xml = (content) ->
+  try
+    xml = await xml2js.parseStringPromise content
+  catch e
+    return null
+  list = xml.packet?.chat
+  return null unless list
+  { chat.$..., message: chat._ } for chat in list
+
+load_file = (filename) ->
+  filename = process.stdin.fd if filename == '-'
+  content = fs.readFileSync filename, 'utf8'
+
+  try return JSON.parse content catch
+
+  list = await parse_xml content
+  return list if list
+
+  throw new Error '入力ファイルのフォーマットが未対応です'
+
 randomize = (list) ->
   for chat in list
-    chat.vpos += Math.floor(Math.random() * 100)
+    if chat.vpos % 100 == 0
+      chat.vpos += Math.floor(Math.random() * 100)
   return
 
 build_xml = (list) ->
@@ -65,10 +86,15 @@ build_xml = (list) ->
 
 main = ->
   argv = require 'yargs'
-    .command '$0 URL', '動画のコメントを取得します', (yargs) ->
-      yargs.positional 'URL',
-        desc: '動画URL'
-        type: 'string'
+    .command '$0 <url|file>', '動画のコメントを取得または変換します',
+      (yargs) ->
+        yargs
+          .positional 'url',
+            desc: '動画URL'
+            type: 'string'
+          .positional 'file',
+            desc: '変換元ファイル'
+            type: 'string'
     .option 'delay',
       alias: 'd'
       desc: '時間のずれ(秒)'
@@ -78,27 +104,60 @@ main = ->
       alias: 'R'
       desc: '秒以下を乱数化しない'
       type: 'boolean'
+    .option 'format',
+      alias: 'f'
+      desc: '出力フォーマット'
+      choices: ['xml', 'json']
+      default: 'xml'
+    .option 'output',
+      alias: 'o'
+      desc: '出力ファイル名'
+      type: 'string'
+      default: 'auto'
     .help()
     .alias 'help', 'h'
+    .alias 'version', 'v'
     .argv
 
-  info = await info_from_url argv.URL
-
-  console.warn "Loading comments for '#{info.title}'."
-  list = await download_comments info, argv.delay
+  if /^https?:\/\//.test argv.url
+    info = await info_from_url argv.url
+    title = info.title
+    console.warn "Loading comments for '#{info.title}'."
+    list = await download_comments info, argv.delay
+  else
+    list = await load_file argv.file
+    title = path.basename argv.file
+    if '.' in title
+      title = title.split('.').slice(0, -1).join('.')
 
   randomize list unless argv.norandom
-
   list.sort (a, b) -> a.vpos - b.vpos
 
-  xml = build_xml list
-  filename = "#{info.title}.xml"
-  fs.writeFileSync filename, xml
+  filename =
+    if argv.output == 'auto'
+      filename = "#{title}.#{argv.format}"
+    else
+      argv.output
+
+  if filename == argv.file
+    throw new Error '出力ファイル名が入力ファイルと同じです'
+
+  output =
+    if argv.format == 'xml'
+      build_xml list
+    else
+      JSON.stringify list
 
   write_tty '\r'
-  process.stderr.write "✔ Saved to '#{filename}'."
+  process.stderr.write "Saving to '#{filename}': "
   write_tty '\x1b[K'
-  process.stderr.write '\n'
+
+  if filename == '-'
+    process.stdout.write output
+  else
+    fs.writeFileSync filename, output
+
+  process.stderr.write 'done.\n'
 
 module.exports = { info_from_url, download_comments, build_xml }
 
