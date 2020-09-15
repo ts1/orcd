@@ -19,14 +19,14 @@ test 'build_xml', ->
     .toBe xml
 
 # Online tests
-#
+
 test 'info_from_url', ->
-  info = await orcd.info_from_url 'https://www.openrec.tv/live/d1rnynj298v'
+  info = await orcd.info_from_url 'https://www.openrec.tv/live/o7z4k3qvp8l'
   expect info.id
-    .toBe 'd1rnynj298v'
+    .toBe 'o7z4k3qvp8l'
 
 test 'download_comments', ->
-  info = await orcd.info_from_url 'https://www.openrec.tv/live/d1rnynj298v'
+  info = await orcd.info_from_url 'https://www.openrec.tv/live/o7z4k3qvp8l'
   comments = await orcd.download_comments info, 0
   expect comments.length
     .toBeGreaterThan 0
