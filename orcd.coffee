@@ -35,9 +35,11 @@ download_comments = (info, delay) ->
     url = "https://public.openrec.tv/external/api/v5/movies/#{info.id}/chats?"+
      "from_created_at=#{t.toISOString()}&is_including_system_message=false"
     chats = await get_json url
+    new_chat = false
     for chat in chats
       continue if ids[chat.id]
       ids[chat.id] = true
+      new_chat = true
       posted_at = new Date chat.posted_at
       vpos = (posted_at.getTime() - start_at.getTime()) / 10 - delay * 100
       continue if vpos < 0
@@ -47,7 +49,7 @@ download_comments = (info, delay) ->
     progress = (t.getTime() - start_at.getTime()) /
       (end_at.getTime() - start_at.getTime())
     show_progress progress
-    break if chats.length < 100
+    break unless new_chat
   list
 
 randomize = (list) ->
