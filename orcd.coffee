@@ -214,7 +214,7 @@ main = ->
 
   do ->
     try
-      await main args
+      await orcd args
     catch e
       console.error e.message or e
       throw e if args.debug
