@@ -24,11 +24,10 @@ info_from_url = (url) ->
   video_id = url.split('/').slice(-1)[0]
   await get_json 'https://public.openrec.tv/external/api/v5/movies/' + video_id
 
-download_comments = (info, delay) ->
+download_comments = (info) ->
   start_at = new Date info.started_at
   end_at = new Date info.ended_at
-  t = new Date start_at
-  t.setSeconds t.getSeconds() + delay
+  t = start_at
   list = []
   ids = {}
   while true
@@ -41,7 +40,7 @@ download_comments = (info, delay) ->
       ids[chat.id] = true
       new_chat = true
       posted_at = new Date chat.posted_at
-      vpos = (posted_at.getTime() - start_at.getTime()) / 10 - delay * 100
+      vpos = (posted_at.getTime() - start_at.getTime()) / 10
       continue if vpos < 0
       user_id = chat.user.id
       list.push { vpos, user_id, message: chat.message }
@@ -72,6 +71,11 @@ load_file = (filename) ->
 
   throw new Error '入力ファイルのフォーマットが未対応です'
 
+add_delay = (list, delay) ->
+  list
+    .map (item) -> { item..., vpos: item.vpos - delay * 100 }
+    .filter (item) -> item.vpos >= 0
+
 randomize = (list) ->
   for chat in list
     if chat.vpos % 100 == 0
@@ -97,9 +101,9 @@ main = ->
             type: 'string'
     .option 'delay',
       alias: 'd'
-      desc: '時間のずれ(秒)'
+      desc: '時間のずれ(秒)\nダウンロード時デフォルト15秒\nファイル入力時デフォルト0秒'
       type: 'number'
-      default: 15
+      default: null
     .option 'norandom',
       alias: 'R'
       desc: '秒以下を乱数化しない'
@@ -117,20 +121,24 @@ main = ->
     .help()
     .alias 'help', 'h'
     .alias 'version', 'v'
+    .strict()
     .argv
 
   if /^https?:\/\//.test argv.url
+    default_delay = 15
     info = await info_from_url argv.url
     title = info.title
     console.warn "Loading comments for '#{info.title}'."
-    list = await download_comments info, argv.delay
+    list = await download_comments info
   else
+    default_delay = 0
     list = await load_file argv.file
     title = path.basename argv.file
     if '.' in title
       title = title.split('.').slice(0, -1).join('.')
 
   randomize list unless argv.norandom
+  list = add_delay list, argv.delay ? default_delay
   list.sort (a, b) -> a.vpos - b.vpos
 
   filename =
