@@ -3,6 +3,7 @@ fs = require 'fs'
 fetch = require 'node-fetch'
 { create } = require 'xmlbuilder2'
 xml2js = require 'xml2js'
+ass = require './ass'
 
 get_json = (url) ->
   res = await fetch url
@@ -58,7 +59,12 @@ parse_xml = (content) ->
     return null
   list = xml.packet?.chat
   return null unless list
-  { chat.$..., message: chat._ } for chat in list
+
+  for chat in list
+    vpos = Number chat.$.vpos
+    user_id = chat.$.user_id
+    message = chat._ or ''
+    { vpos, user_id, message }
 
 load_file = (filename) ->
   filename = process.stdin.fd if filename == '-'
@@ -73,7 +79,7 @@ load_file = (filename) ->
 
 add_delay = (list, delay) ->
   list
-    .map (item) -> { item..., vpos: item.vpos - delay * 100 }
+    .map (item) -> { item..., vpos: item.vpos - (delay * 100) }
     .filter (item) -> item.vpos >= 0
 
 randomize = (list) ->
@@ -88,71 +94,43 @@ build_xml = (list) ->
     root.ele('chat', vpos: item.vpos, user_id: item.user_id).txt(item.message)
   root.end prettyPrint: true
 
-main = ->
-  argv = require 'yargs'
-    .command '$0 <url|file>', '動画のコメントを取得または変換します',
-      (yargs) ->
-        yargs
-          .positional 'url',
-            desc: '動画URL'
-            type: 'string'
-          .positional 'file',
-            desc: '変換元ファイル'
-            type: 'string'
-    .option 'delay',
-      alias: 'd'
-      desc: '時間のずれ(秒)\nダウンロード時デフォルト15秒\nファイル入力時デフォルト0秒'
-      type: 'number'
-      default: null
-    .option 'norandom',
-      alias: 'R'
-      desc: '秒以下を乱数化しない'
-      type: 'boolean'
-    .option 'format',
-      alias: 'f'
-      desc: '出力フォーマット'
-      choices: ['xml', 'json']
-      default: 'xml'
-    .option 'output',
-      alias: 'o'
-      desc: '出力ファイル名'
-      type: 'string'
-      default: 'auto'
-    .help()
-    .alias 'help', 'h'
-    .alias 'version', 'v'
-    .strict()
-    .argv
-
-  if /^https?:\/\//.test argv.url
-    default_delay = 15
-    info = await info_from_url argv.url
+main = (args) ->
+  if /^https?:\/\//.test args.url
+    default_delay = 0
+    info = await info_from_url args.url
     title = info.title
     console.warn "Loading comments for '#{info.title}'."
     list = await download_comments info
   else
-    default_delay = 0
-    list = await load_file argv.file
-    title = path.basename argv.file
+    default_delay = 15
+    list = await load_file args.file
+    title = path.basename args.file
     if '.' in title
       title = title.split('.').slice(0, -1).join('.')
 
-  randomize list unless argv.norandom
-  list = add_delay list, argv.delay ? default_delay
+  randomize list unless args.norandom
+  list = add_delay list, args.delay ? default_delay
   list.sort (a, b) -> a.vpos - b.vpos
 
   filename =
-    if argv.output == 'auto'
-      filename = "#{title}.#{argv.format}"
+    if args.output == 'auto'
+      filename = "#{title}.#{args.format}"
     else
-      argv.output
+      args.output
 
-  if filename == argv.file
+  if filename == args.file
     throw new Error '出力ファイル名が入力ファイルと同じです'
 
   output =
-    if argv.format == 'xml'
+    if args.format == 'xml'
       build_xml list
+    else if args.format == 'ass'
+      ass.build list,
+        font_name: args.fontname
+        font_size: args.fontsize
+        margin: args.margin
+        outline: args.outline
+        displayed_time: args.time
     else
       JSON.stringify list
 
@@ -170,9 +148,81 @@ main = ->
 module.exports = { info_from_url, download_comments, build_xml }
 
 if require.main == module
+  args = require 'yargs'
+    .command '$0 <url|file>', '動画のコメントを取得または変換します',
+      (yargs) ->
+        yargs
+          .positional 'url|file',
+            desc: 'ダウンロードURL、または変換元ファイル'
+            type: 'string'
+    .option 'delay',
+      alias: 'd'
+      desc: '''
+        時間のずれ(秒)
+        ダウンロード時デフォルト0秒
+        ファイル変換時デフォルト15秒'''
+      type: 'number'
+      default: null
+    .option 'norandom',
+      alias: 'R'
+      desc: '秒以下を乱数化しない'
+      type: 'boolean'
+    .option 'format',
+      alias: 'f'
+      desc: '出力フォーマット'
+      choices: ['xml', 'ass', 'json']
+      default: 'xml'
+    .group [
+        'fontname'
+        'fontsize'
+        'margin'
+        'outline'
+        'time'
+      ], 'ASSオプション:'
+    .option 'fontname',
+      alias: 'F'
+      desc: 'フォント名'
+      type: 'string'
+      default: ass.DEFAULTS.font_name
+    .option 'fontsize',
+      alias: 's'
+      desc: 'フォントサイズ(px)'
+      type: 'number'
+      default: ass.DEFAULTS.font_size
+    .option 'margin',
+      alias: 'm'
+      desc: '上下のマージン(px)'
+      type: 'number'
+      default: ass.DEFAULTS.margin
+    .option 'outline',
+      alias: 'O'
+      desc: '文字のアウトライン(px)'
+      type: 'number'
+      default: ass.DEFAULTS.outline
+    .option 'time',
+      alias: 't'
+      desc: 'コメント1個の表示時間(秒)'
+      type: 'number'
+      default: ass.DEFAULTS.displayed_time
+    .option 'output',
+      alias: 'o'
+      desc: '出力ファイル名'
+      type: 'string'
+      default: 'auto'
+    .option 'debug',
+      alias: 'D'
+      desc: 'デバッグモード'
+      type: 'boolean'
+    .help()
+    .alias 'help', 'h'
+    .alias 'version', 'v'
+    .strict()
+    .argv
+
   do ->
     try
-      await main()
+      await main args
     catch e
       console.error e.message or e
+      throw e if args.debug
       process.exit 1
