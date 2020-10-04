@@ -1,6 +1,6 @@
 {
   "name": "orcd",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "license": "MIT",
   "description": "Comment downloader for OPENREC.tv",
   "author": "Takeshi Sone <takeshi.sone@gmail.com> (https://github.com/ts1)",
