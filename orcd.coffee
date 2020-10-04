@@ -94,7 +94,7 @@ build_xml = (list) ->
     root.ele('chat', vpos: item.vpos, user_id: item.user_id).txt(item.message)
   root.end prettyPrint: true
 
-main = (args) ->
+orcd = (args) ->
   if /^https?:\/\//.test args.url
     default_delay = 0
     info = await info_from_url args.url
@@ -145,9 +145,7 @@ main = (args) ->
 
   process.stderr.write 'done.\n'
 
-module.exports = { info_from_url, download_comments, build_xml }
-
-if require.main == module
+main = ->
   args = require 'yargs'
     .command '$0 <url|file>', '動画のコメントを取得または変換します',
       (yargs) ->
@@ -221,3 +219,5 @@ if require.main == module
       console.error e.message or e
       throw e if args.debug
       process.exit 1
+
+module.exports = { info_from_url, download_comments, build_xml, main }

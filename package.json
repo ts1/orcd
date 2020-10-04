@@ -6,25 +6,26 @@
   "author": "Takeshi Sone <takeshi.sone@gmail.com> (https://github.com/ts1)",
   "repository": "github:ts1/orcd",
   "dependencies": {
+    "coffeescript": "^2.5.1",
     "node-fetch": "^2.6.1",
     "xml2js": "^0.4.23",
     "xmlbuilder2": "^2.3.1",
     "yargs": "^16.0.3"
   },
   "scripts": {
-    "dist": "echo '#!/usr/bin/env node' > orcd.js && coffee -cbs < orcd.coffee >>orcd.js && chmod +x orcd.js",
     "orcd": "coffee orcd.coffee",
     "test": "jest"
   },
-  "main": "orcd.js",
+  "main": "orcd.coffee",
   "bin": {
-    "orcd": "orcd.js"
+    "orcd": "cli.js"
   },
   "files": [
-    "orcd.js"
+    "cli.js",
+    "orcd.coffee",
+    "ass.coffee"
   ],
   "devDependencies": {
-    "coffeescript": "^2.5.1",
     "jest": "^26.4.2"
   },
   "jest": {
