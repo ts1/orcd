@@ -172,13 +172,13 @@ if require.main == module
       desc: '出力フォーマット'
       choices: ['xml', 'ass', 'json']
       default: 'xml'
-    .group [
-        'fontname'
-        'fontsize'
-        'margin'
-        'outline'
-        'time'
-      ], 'ASSオプション:'
+    .option 'output',
+      alias: 'o'
+      desc: '出力ファイル名'
+      type: 'string'
+      default: 'auto'
+    .group ['fontname', 'fontsize', 'margin', 'outline', 'time'],
+      'ASSオプション:'
     .option 'fontname',
       alias: 'F'
       desc: 'フォント名'
@@ -204,11 +204,6 @@ if require.main == module
       desc: 'コメント1個の表示時間(秒)'
       type: 'number'
       default: ass.DEFAULTS.displayed_time
-    .option 'output',
-      alias: 'o'
-      desc: '出力ファイル名'
-      type: 'string'
-      default: 'auto'
     .option 'debug',
       alias: 'D'
       desc: 'デバッグモード'
