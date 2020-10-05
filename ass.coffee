@@ -95,7 +95,9 @@ to_hms = (t) ->
 
 build_events = (list, opt) ->
   lineheight = opt.font_size + opt.margin * 2
-  n_rows = Math.floor(HEIGHT / lineheight)
+  n_normal_rows = Math.floor((HEIGHT + opt.margin) / lineheight)
+  n_wrap_rows = Math.floor((HEIGHT + opt.margin - lineheight / 2) / lineheight)
+  n_rows = n_normal_rows + n_wrap_rows
   item_in_row = (null for i in [0...n_rows])
   list.map (item, index) ->
     row = null
@@ -116,7 +118,12 @@ build_events = (list, opt) ->
     len = item.message.length * opt.font_size
     x0 = WIDTH
     x1 = -len
-    y = opt.margin + row * (opt.font_size + opt.margin * 2)
+    y =
+      if row < n_normal_rows
+        opt.margin + row * (opt.font_size + opt.margin * 2)
+      else
+        lineheight / 2 + opt.margin +
+          (row - n_normal_rows) * (opt.font_size + opt.margin * 2)
     effect = "{\\move(#{x0},#{y},#{x1},#{y})}"
 
     'Dialogue: ' + [
