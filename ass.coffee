@@ -65,7 +65,8 @@ collision_at_start = (first, second, opt) ->
   speed = (WIDTH + len) / (opt.displayed_time * 100)
   time = second.vpos - first.vpos
   first_pos_when_second_starts = speed * time
-  len - first_pos_when_second_starts
+  margin = opt.font_size / 2
+  len + margin - first_pos_when_second_starts
 
 collision_at_end = (first, second, opt) ->
   first_ends_at = first.vpos + opt.displayed_time * 100
@@ -101,7 +102,7 @@ build_events = (list, opt) ->
     min_collision = Infinity
     for i in [0...n_rows]
       c = collision item_in_row[i], item, opt
-      if c < -opt.font_size
+      if c <= 0
         row = i
         break
       if c < min_collision
