@@ -13,27 +13,25 @@
     "yargs": "^16.0.3"
   },
   "scripts": {
-    "orcd": "coffee cli.coffee",
-    "test": "jest"
+    "orcd": "src/bootstrap.js",
+    "test": "jest",
+    "dist": "rm -rf dist && mkdir dist && for f in src/*.coffee; do coffee -cs < $f >dist/`basename $f .coffee`.js; done; cp src/bootstrap.js dist"
   },
-  "main": "orcd.coffee",
+  "main": "dist/orcd.js",
   "bin": {
-    "orcd": "cli.js"
+    "orcd": "dist/bootstrap.js"
   },
   "files": [
-    "bootstrap.js",
-    "cli.coffee",
-    "orcd.coffee",
-    "ass.coffee"
+    "dist"
   ],
   "devDependencies": {
     "jest": "^26.4.2"
   },
   "jest": {
     "transform": {
-      "\\.coffee$": "<rootDir>/coffee-preprocessor.js"
+      "\\.coffee$": "<rootDir>/tests/coffee-preprocessor.js"
     },
-    "testRegex": "test.*\\.coffee$",
+    "testRegex": "tests/.+\\.coffee$",
     "moduleFileExtensions": [
       "js",
       "coffee"

@@ -1,4 +1,4 @@
-orcd = require './orcd.coffee'
+orcd = require '../src/orcd'
 
 jest.setTimeout 60000
 

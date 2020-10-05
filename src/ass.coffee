@@ -1,4 +1,4 @@
-pkg = require './package.json'
+pkg = require '../package.json'
 
 DEFAULTS =
   font_name: 'MS PGothic'

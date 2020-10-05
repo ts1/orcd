@@ -1,5 +1,5 @@
-ass = require './ass.coffee'
-{ version } = require './package.json'
+ass = require '../src/ass.coffee'
+{ version } = require '../package.json'
 
 test 'build', ->
   comments = [
