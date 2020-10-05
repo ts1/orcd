@@ -96,20 +96,18 @@ build_xml = (list) ->
 
 orcd = (args) ->
   if /^https?:\/\//.test args.url
-    default_delay = 0
     info = await info_from_url args.url
     title = info.title
     console.warn "Loading comments for '#{info.title}'."
     list = await download_comments info
   else
-    default_delay = 15
     list = await load_file args.file
     title = path.basename args.file
     if '.' in title
       title = title.split('.').slice(0, -1).join('.')
 
   randomize list unless args.norandom
-  list = add_delay list, args.delay ? default_delay
+  list = add_delay list, args.delay
   list.sort (a, b) -> a.vpos - b.vpos
 
   filename =
@@ -155,12 +153,9 @@ main = ->
             type: 'string'
     .option 'delay',
       alias: 'd'
-      desc: '''
-        時間のずれ(秒)
-        ダウンロード時デフォルト0秒
-        ファイル変換時デフォルト15秒'''
+      desc: '時間のずれ(秒)'
       type: 'number'
-      default: null
+      default: 0
     .option 'norandom',
       alias: 'R'
       desc: '秒以下を乱数化しない'
