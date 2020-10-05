@@ -13,7 +13,7 @@
     "yargs": "^16.0.3"
   },
   "scripts": {
-    "orcd": "coffee orcd.coffee",
+    "orcd": "coffee cli.coffee",
     "test": "jest"
   },
   "main": "orcd.coffee",
@@ -21,7 +21,8 @@
     "orcd": "cli.js"
   },
   "files": [
-    "cli.js",
+    "bootstrap.js",
+    "cli.coffee",
     "orcd.coffee",
     "ass.coffee"
   ],
