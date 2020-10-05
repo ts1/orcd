@@ -32,7 +32,7 @@
     "transform": {
       "\\.coffee$": "<rootDir>/coffee-preprocessor.js"
     },
-    "testRegex": "test*\\.coffee$",
+    "testRegex": "test.*\\.coffee$",
     "moduleFileExtensions": [
       "js",
       "coffee"
