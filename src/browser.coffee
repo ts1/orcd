@@ -1,5 +1,5 @@
-import { info_from_url, download_comments, randomize } from './download.coffee'
-import { build } from './ass.coffee'
+import { info_from_url, download_comments, randomize } from './download'
+import { build } from './ass'
 
 save = (filename, s) ->
   blob = new Blob [s], type: 'text/plain'
