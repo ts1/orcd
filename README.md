@@ -7,6 +7,18 @@ OPENREC.tvコメントダウンローダー
 
 ![サンプル画像](https://github.com/ts1/orcd/blob/master/sample.jpg?raw=true)
 
+## ブラウザ版の使用方法
+
+下記のコードをURLとしてブックマークを作成してください。
+
+```
+javascript:(s=document.createElement('script')).src='https://unpkg.com/orcd/browser/orcd.js';document.body.append(s)
+```
+
+OPENRECの動画URLで、上記で作成したブックマークをクリックするとASS形式でダウンロードします。
+
+以下はコマンドラインの使用法です。
+
 ## 必要なもの
 
 - Node.js 10.x以上
