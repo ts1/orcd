@@ -15,7 +15,7 @@ OPENREC.tvコメントダウンローダー
 javascript:(s=document.createElement('script')).src='https://unpkg.com/orcd/browser/orcd.js';document.body.append(s)
 ```
 
-OPENRECの動画URLで、上記で作成したブックマークをクリックするとASS形式でダウンロードします。
+OPENRECの動画ページで、上記で作成したブックマークをクリックするとASS形式でダウンロードします。
 
 以下はコマンドラインの使用法です。
 
@@ -65,11 +65,6 @@ XMLまたはJSONで保存したファイルをASS, JSON, XMLのいずれかに�
 ```
 orcd 159.xml -f ass
 ```
-
-#### 注意
-
-~~v0.1.0 ではダウンロードの `delay` オプションがデフォルト15秒になっているため、そのまま変換すると `delay` が二重になってしまいます。
-v0.1.0 でダウンロードしたファイルを変換するときは `-d 0` (または、補正値) をつけてください。~~ → v0.3.1 で常にデフォルト0秒に変更しました。
 
 ### その他のオプション
 

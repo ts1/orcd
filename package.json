@@ -12,14 +12,14 @@
     "yargs": "^16.0.3"
   },
   "scripts": {
-    "orcd": "src/bootstrap.js",
+    "orcd": "coffee src/cli.coffee",
     "test": "jest",
-    "dist": "rm -rf dist && mkdir dist && for f in src/*.coffee; do coffee -cs < $f >dist/`basename $f .coffee`.js; done; cp src/bootstrap.js dist",
+    "dist": "rm -rf dist && mkdir dist && echo '#!/usr/bin/env node' > dist/cli.js; chmod +x dist/cli.js; for f in src/*.coffee; do coffee -cs < $f >>dist/`basename $f .coffee`.js; done",
     "browser": "rollup -c rollup.config.js"
   },
   "main": "dist/orcd.js",
   "bin": {
-    "orcd": "dist/bootstrap.js"
+    "orcd": "dist/cli.js"
   },
   "files": [
     "dist",
