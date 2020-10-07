@@ -1,14 +1,9 @@
 path = require 'path'
 fs = require 'fs'
-fetch = require 'node-fetch'
 { create } = require 'xmlbuilder2'
 xml2js = require 'xml2js'
+{ info_from_url, download_comments, randomize } = require './download'
 ass = require './ass'
-
-get_json = (url) ->
-  res = await fetch url
-  throw new Error await res.text() unless res.ok
-  res.json()
 
 write_tty = (s) -> process.stderr.write s if process.stderr.isTTY
 
@@ -18,39 +13,6 @@ show_progress = (progress) ->
   bar += '─'.repeat w - bar.length
   percent = Math.round(99 * progress)
   write_tty "\r[#{bar}] #{percent}%"
-
-info_from_url = (url) ->
-  unless /^https?:\/\/www\.openrec\.tv\/live\//.test url
-    throw new Error 'URLが正しくありません'
-  video_id = url.split('/').slice(-1)[0]
-  await get_json 'https://public.openrec.tv/external/api/v5/movies/' + video_id
-
-download_comments = (info) ->
-  start_at = new Date info.started_at
-  end_at = new Date info.ended_at
-  t = start_at
-  list = []
-  ids = {}
-  while true
-    url = "https://public.openrec.tv/external/api/v5/movies/#{info.id}/chats?"+
-     "from_created_at=#{t.toISOString()}&is_including_system_message=false"
-    chats = await get_json url
-    new_chat = false
-    for chat in chats
-      continue if ids[chat.id]
-      ids[chat.id] = true
-      new_chat = true
-      posted_at = new Date chat.posted_at
-      vpos = (posted_at.getTime() - start_at.getTime()) / 10
-      continue if vpos < 0
-      user_id = chat.user.id
-      list.push { vpos, user_id, message: chat.message }
-    t = new Date chats.slice(-1)[0].posted_at
-    progress = (t.getTime() - start_at.getTime()) /
-      (end_at.getTime() - start_at.getTime())
-    show_progress progress
-    break unless new_chat
-  list
 
 parse_xml = (content) ->
   try
@@ -82,12 +44,6 @@ add_delay = (list, delay) ->
     .map (item) -> { item..., vpos: item.vpos - (delay * 100) }
     .filter (item) -> item.vpos >= 0
 
-randomize = (list) ->
-  for chat in list
-    if chat.vpos % 100 == 0
-      chat.vpos += Math.floor(Math.random() * 100)
-  return
-
 build_xml = (list) ->
   root = create(version: '1.0').ele('packet')
   for item in list
@@ -99,7 +55,7 @@ orcd = (args) ->
     info = await info_from_url args.url
     title = info.title
     console.warn "Loading comments for '#{info.title}'."
-    list = await download_comments info
+    list = await download_comments info, show_progress
   else
     list = await load_file args.file
     title = path.basename args.file
@@ -108,7 +64,6 @@ orcd = (args) ->
 
   randomize list unless args.norandom
   list = add_delay list, args.delay
-  list.sort (a, b) -> a.vpos - b.vpos
 
   filename =
     if args.output == 'auto'
@@ -143,4 +98,8 @@ orcd = (args) ->
 
   process.stderr.write 'done.\n'
 
-module.exports = { info_from_url, download_comments, build_xml, orcd }
+module.exports = {
+  randomize
+  build_xml
+  orcd
+}

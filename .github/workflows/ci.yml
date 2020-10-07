@@ -16,4 +16,5 @@ jobs:
           registry-url: https://registry.npmjs.org/
       - run: yarn
       - run: yarn dist
+      - run: yarn browser
       - run: yarn test
