@@ -7,7 +7,9 @@ OPENREC.tvコメントダウンローダー
 
 ![サンプル画像](https://github.com/ts1/orcd/blob/master/sample.jpg?raw=true)
 
-## ブラウザ版の使用方法
+OPENREC.tvのコメントをニコニコ動画風のASS等の形式で保存することができます。
+
+## ブラウザでの使用方法
 
 下記のコードをURLとしてブックマークを作成してください。
 
