@@ -12,7 +12,7 @@ args = require 'yargs'
     alias: 'd'
     desc: '時間のずれ(秒)'
     type: 'number'
-    default: 0
+    default: 10
   .option 'norandom',
     alias: 'R'
     desc: '秒以下を乱数化しない'
